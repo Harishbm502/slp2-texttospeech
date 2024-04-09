@@ -13,15 +13,14 @@ try:
 except:
     pass
 
-# Title and Description
 st.title("Multilingual Text-to-Speech Converter")
-st.write("This application translates text into speech in various languages.")
+st.write("This tool converts text into speech in multiple languages.")
 
 translator = Translator()
 
 text = st.text_input("Enter text")
 in_lang = st.selectbox(
-    "Select input language",
+    "Select your input language",
     ("English", "Hindi", "Bengali", "Korean", "Chinese", "Japanese"),
 )
 if in_lang == "English":
@@ -38,7 +37,7 @@ elif in_lang == "Japanese":
     input_language = "ja"
 
 out_lang = st.selectbox(
-    "Select output language",
+    "Select your output language",
     ("English", "Hindi", "Bengali", "Korean", "Chinese", "Japanese"),
 )
 if out_lang == "English":
@@ -55,7 +54,6 @@ elif out_lang == "Japanese":
     output_language = "ja"
 
 
-# Function to convert text to speech
 def text_to_speech(input_language, output_language, text):
     translation = translator.translate(text, src=input_language, dest=output_language)
     trans_text = translation.text
