@@ -4,80 +4,82 @@ import time
 import glob
 import os
 
-from gtts import gTTS
 
-# Create a temporary directory if it doesn't exist
+from gtts import gTTS
+from googletrans import Translator
+
 try:
     os.mkdir("temp")
 except:
     pass
 
-# Title with Emoji
-st.title("🔊 Text to Speech 🔊")
+st.title("Multilingual Text-to-Speech Converter")
+st.write("This tool converts text into speech in multiple languages.")
 
-# Description of the project
-st.write("This is a simple text-to-speech converter that converts English text into speech.")
+translator = Translator()
 
-# Input Text
 text = st.text_input("Enter text")
+in_lang = st.selectbox(
+    "Select your input language",
+    ("English", "Hindi", "Bengali", "Korean", "Chinese", "Japanese"),
+)
+if in_lang == "English":
+    input_language = "en"
+elif in_lang == "Hindi":
+    input_language = "hi"
+elif in_lang == "Bengali":
+    input_language = "bn"
+elif in_lang == "Korean":
+    input_language = "ko"
+elif in_lang == "Chinese":
+    input_language = "zh-cn"
+elif in_lang == "Japanese":
+    input_language = "ja"
 
-# Select output language
 out_lang = st.selectbox(
     "Select your output language",
-    ("English",)
+    ("English", "Hindi", "Bengali", "Korean", "Chinese", "Japanese"),
 )
+if out_lang == "English":
+    output_language = "en"
+elif out_lang == "Hindi":
+    output_language = "hi"
+elif out_lang == "Bengali":
+    output_language = "bn"
+elif out_lang == "Korean":
+    output_language = "ko"
+elif out_lang == "Chinese":
+    output_language = "zh-cn"
+elif out_lang == "Japanese":
+    output_language = "ja"
 
-# Mapping output languages to language codes
-language_codes = {"English": "en"}
-output_language = language_codes[out_lang]
 
-# Select English accent
-english_accent = st.selectbox(
-    "Select your English accent",
-    (
-        "Default",
-        "India",
-        "United Kingdom",
-        "United States",
-        "Canada",
-        "Australia",
-        "Ireland",
-        "South Africa",
-    ),
-)
-
-# Mapping English accents to top-level domains (TLDs) for Google Translate
-accent_tlds = {
-    "Default": "com",
-    "India": "co.in",
-    "United Kingdom": "co.uk",
-    "United States": "com",
-    "Canada": "ca",
-    "Australia": "com.au",
-    "Ireland": "ie",
-    "South Africa": "co.za",
-}
-tld = accent_tlds[english_accent]
-
-# Function to convert text to speech
-def text_to_speech(text, output_language, tld):
-    tts = gTTS(text, lang=output_language, tld=tld, slow=False)
+def text_to_speech(input_language, output_language, text):
+    translation = translator.translate(text, src=input_language, dest=output_language)
+    trans_text = translation.text
+    tts = gTTS(trans_text, lang=output_language, slow=False)
     try:
-        my_file_name = text[:20] if len(text) > 20 else text  # Limiting file name to 20 characters
+        my_file_name = text[0:20]
     except:
         my_file_name = "audio"
     tts.save(f"temp/{my_file_name}.mp3")
-    return my_file_name
+    return my_file_name, trans_text
 
-# Convert button
+
+display_output_text = st.checkbox("Display output text")
+
 if st.button("Convert"):
-    result = text_to_speech(text, output_language, tld)
+    result, output_text = text_to_speech(input_language, output_language, text)
     audio_file = open(f"temp/{result}.mp3", "rb")
     audio_bytes = audio_file.read()
     st.markdown(f"## Your audio:")
     st.audio(audio_bytes, format="audio/mp3", start_time=0)
 
-# Function to remove old files
+    if display_output_text:
+        st.markdown(f"## Output text:")
+        st.write(f" {output_text}")
+
+
 def remove_files(n):
     mp3_files = glob.glob("temp/*mp3")
     if len(mp3_files) != 0:
@@ -88,5 +90,5 @@ def remove_files(n):
                 os.remove(f)
                 print("Deleted ", f)
 
-# Remove files older than 7 days
+
 remove_files(7)
